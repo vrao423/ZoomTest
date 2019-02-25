@@ -31,7 +31,7 @@ class CropView: UIView {
 
     var contentInset: UIEdgeInsets = .zero {
         didSet {
-            imageView.contentInset = contentInset
+//            imageView.contentInset = contentInset
         }
     }
 
@@ -102,16 +102,25 @@ class CropView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    var oldBounds = CGRect.zero
+
     override func layoutSubviews() {
         super.layoutSubviews()
 
+        if self.bounds == oldBounds {
+            return
+        }
+
         print("Crop View layoutSubview: \(imageView.adjustedContentInset)")
 
-        topHeight?.constant = imageView.adjustedContentInset.top
-        bottomHeight?.constant = imageView.adjustedContentInset.bottom
-        leftWidth?.constant = imageView.adjustedContentInset.left
-        rightWidth?.constant = imageView.adjustedContentInset.right
+        self.topHeight?.constant = self.imageView.adjustedContentInset.top
+        self.bottomHeight?.constant = self.imageView.adjustedContentInset.bottom
+        self.leftWidth?.constant = self.imageView.adjustedContentInset.left
+        self.rightWidth?.constant = self.imageView.adjustedContentInset.right
+
 //        setBox()
+
+        oldBounds = bounds
     }
 
     func setBox() {
@@ -119,17 +128,25 @@ class CropView: UIView {
             return
         }
 
+        var contentInset = imageView.contentInset
+
         let ratio = currentImage.size.width / currentImage.size.height
 
         if ratio > 1 {
             let imageWidth = (bounds.height - imageView.adjustedContentInset.top - imageView.adjustedContentInset.bottom) * ratio
             leftWidth?.constant = imageView.center.x - imageWidth / 2.0
             rightWidth?.constant = imageView.center.x - imageWidth / 2.0
+            contentInset.left = imageView.center.x - imageWidth / 2.0
+            contentInset.right = imageView.center.x - imageWidth / 2.0
         } else {
             let imageHeight = (bounds.width - imageView.adjustedContentInset.left - imageView.adjustedContentInset.right) / ratio
             topHeight?.constant = imageView.center.y - imageHeight / 2.0
             bottomHeight?.constant = imageView.center.y - imageHeight / 2.0
+            contentInset.top = imageView.center.y - imageHeight / 2.0
+            contentInset.bottom = imageView.center.y - imageHeight / 2.0
         }
+
+        imageView.contentInset = contentInset
     }
 
     @objc func dismissPressed(sender: UIButton) {

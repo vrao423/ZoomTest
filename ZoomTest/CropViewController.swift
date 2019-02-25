@@ -24,7 +24,7 @@ class CropViewController: UIViewController {
     init(delegate: CropViewControllerDelegate) {
         self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
-        cropView.contentInset = UIEdgeInsets(top: 50, left: 100, bottom: 50, right: 100)
+//        cropView.contentInset = UIEdgeInsets(top: 50, left: 25, bottom: 50, right: 25)
         cropView.delegate = self
     }
 

@@ -10,6 +10,8 @@
 
 @class RSZoomableImageView;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol RSZoomableImageViewDelegate <NSObject>
 
 -(void)zoomableImageViewDidZoom:(nonnull RSZoomableImageView *)zoomableImageView;
@@ -18,13 +20,16 @@
 
 @interface RSZoomableImageView : UIScrollView
 
-@property (nonatomic, strong) UITapGestureRecognizer * _Nonnull doubleTapGestureRecognizer;
-@property (nonatomic, strong) UIImageView * _Nonnull imageViewFull;
-@property (nonatomic, strong) UIImage *currentImage;
+@property (nonatomic, strong) UITapGestureRecognizer * doubleTapGestureRecognizer;
+@property (nonatomic, strong) UIImageView * imageViewFull;
+@property (nonatomic, strong, nullable) UIImage *currentImage;
 
 @property (nonatomic, weak) id<RSZoomableImageViewDelegate> _Nullable zoomDelegate;
 
+-(instancetype)initWithFrame:(CGRect)frame withScreenScale:(CGFloat)screenScale;
 
 -(void)prepareForReuse;
 
 @end
+
+NS_ASSUME_NONNULL_END

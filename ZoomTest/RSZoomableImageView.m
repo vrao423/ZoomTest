@@ -12,13 +12,21 @@
 
 @property (assign, nonatomic) CGRect oldBounds;
 @property (assign, nonatomic) CGSize oldImageSize;
-@property (assign, nonatomic) BOOL updatingFrame;
+@property (assign, nonatomic, getter = isUpdatingFrame) BOOL updatingFrame;
+
+@property (assign, nonatomic) CGFloat screenScale;
 
 @end
 
 @implementation RSZoomableImageView
 
--(instancetype)initWithFrame: (CGRect)frame {
+-(instancetype)initWithFrame:(CGRect)frame withScreenScale:(CGFloat)screenScale {
+    self = [self initWithFrame:frame];
+    self.screenScale = screenScale;
+    return self;
+}
+
+-(instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     
     if (self) {
@@ -32,6 +40,12 @@
         [self addGestureRecognizer:self.doubleTapGestureRecognizer];
         
         [super addSubview:self.imageViewFull];
+
+        self.screenScale = [UIScreen mainScreen].scale;
+
+//        [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+//            NSLog(@"loop imageview frame: %@", NSStringFromCGRect(self.imageViewFull.frame));
+//        }];
     }
     
     return self;
@@ -39,27 +53,27 @@
 
 -(void)centerScrollViewContents {
 
-    CGSize boundsSize = self.bounds.size;
-    boundsSize.width -= self.adjustedContentInset.left + self.adjustedContentInset.right;
-    boundsSize.height -= self.adjustedContentInset.top + self.adjustedContentInset.bottom;
-
+    CGSize screenSize = [self constrainedSize];
     CGRect contentsFrame = self.imageViewFull.frame;
 
     if (CGSizeEqualToSize(contentsFrame.size, CGSizeZero) ) {
         return;
     }
     
-    if (contentsFrame.size.width < boundsSize.width) {
-        contentsFrame.origin.x = (boundsSize.width - contentsFrame.size.width) / 2.0f;
+    if (contentsFrame.size.width < screenSize.width) {
+        contentsFrame.origin.x = (screenSize.width - contentsFrame.size.width) / 2.0f;
     } else {
         contentsFrame.origin.x = 0.0f;
     }
     
-    if (contentsFrame.size.height < boundsSize.height) {
-        contentsFrame.origin.y = (boundsSize.height - contentsFrame.size.height) / 2.0f;
+    if (contentsFrame.size.height < screenSize.height) {
+        contentsFrame.origin.y = (screenSize.height - contentsFrame.size.height) / 2.0f;
     } else {
         contentsFrame.origin.y = 0.0f;
     }
+
+    NSLog(@"bounds Size: %@", NSStringFromCGSize(screenSize));
+    NSLog(@"contentsFrame: %@", NSStringFromCGRect(contentsFrame));
 
     self.imageViewFull.frame = contentsFrame;
 }
@@ -71,8 +85,8 @@
     }
 
     CGSize imageSize = CGSizeApplyAffineTransform(self.currentImage.size,
-                                                  CGAffineTransformMakeScale(self.currentImage.scale,
-                                                                             self.currentImage.scale));
+                                                  CGAffineTransformMakeScale(self.currentImage.scale/self.screenScale,
+                                                                             self.currentImage.scale/self.screenScale));
 
     if (CGSizeEqualToSize(imageSize, CGSizeZero)) {
         return;
@@ -80,8 +94,8 @@
 
     self.contentSize = imageSize;
 
-    if (!CGSizeEqualToSize(self.contentSize, self.imageViewFull.frame.size)) {
-        self.imageViewFull.frame = CGRectMake(0.0,
+    if (!CGSizeEqualToSize(self.contentSize, self.imageViewFull.bounds.size)) {
+        self.imageViewFull.bounds = CGRectMake(0.0,
                                               0.0,
                                               self.contentSize.width,
                                               self.contentSize.height);
@@ -90,24 +104,23 @@
 
 -(void)updateZoomBounds {
 
-    CGSize imageSize = self.imageViewFull.image.size;
+    if (!self.currentImage) {
+        return;
+    }
 
-    CGSize screenSize = self.bounds.size;
-    screenSize.width -= self.adjustedContentInset.left + self.adjustedContentInset.right;
-    screenSize.height -= self.adjustedContentInset.top + self.adjustedContentInset.bottom;
+    CGSize imageSize = self.imageViewFull.image.size;
+    CGSize screenSize = [self constrainedSize];
 
     self.minimumZoomScale = [self minimumZoomScaleForImageSize:imageSize
                                                 withImageScale:self.imageViewFull.image.scale
-                                           andScreenSizeBounds:screenSize
-                                                     withScale:[UIScreen mainScreen].scale];
+                                           andScreenSizeBounds:screenSize];
     
     self.maximumZoomScale = MAX(self.minimumZoomScale * 2.0, 1.0);
 }
 
 -(CGFloat)minimumZoomScaleForImageSize:(CGSize)imageSize
                          withImageScale:(CGFloat)imageScale
-                    andScreenSizeBounds:(CGSize)screenSize
-                              withScale:(CGFloat)screenScale {
+                    andScreenSizeBounds:(CGSize)screenSize {
 
     NSAssert(!CGSizeEqualToSize(imageSize, CGSizeZero), @"rect cannot be empty");
     
@@ -115,17 +128,15 @@
     CGFloat deviceRatio = screenSize.width / screenSize.height;
     
     if (ratio > deviceRatio) {
-        return (screenSize.width * screenScale) / (imageSize.width * imageScale);
+        return screenSize.width * self.screenScale / (imageSize.width * imageScale);
     } else {
-        return (screenSize.height * screenScale) / (imageSize.height * imageScale);
+        return screenSize.height * self.screenScale / (imageSize.height * imageScale);
     }
 }
 
-
--(void)layoutSubviews {
-    [super layoutSubviews];
-
-    [self centerScrollViewContents];
+-(void)adjustedContentInsetDidChange {
+    [super adjustedContentInsetDidChange];
+    [self updateFrame];
 }
 
 -(void)setBounds:(CGRect)bounds {
@@ -155,6 +166,10 @@
 #pragma mark - UIScrollViewDelegate
 
 -(void)scrollViewDidZoom:(UIScrollView *)scrollView {
+    if (self.updatingFrame) {
+        return;
+    }
+
     [self centerScrollViewContents];
     [self.zoomDelegate zoomableImageViewDidZoom:self];
 }
@@ -162,6 +177,12 @@
 -(UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
     return self.imageViewFull;
 }
+
+- (BOOL)scrollsToTop {
+    return NO;
+}
+
+#pragma mark - Update
 
 -(void)updateFrame {
 
@@ -183,27 +204,18 @@
 
     self.updatingFrame = YES;
 
-    [self updateZoomBounds];
     [self updateContentSize];
-    [self centerScrollViewContents];
-
+    [self updateZoomBounds];
     self.zoomScale = self.minimumZoomScale;
+    [self centerScrollViewContents];
 
     self.oldImageSize = self.imageViewFull.image.size;
 
     self.updatingFrame = NO;
-
-    NSLog(@"contentInset: %@", NSStringFromUIEdgeInsets(self.contentInset));
-    NSLog(@"adjustedContentInset: %@", NSStringFromUIEdgeInsets(self.adjustedContentInset));
-
 }
 
 -(void)setCurrentImage:(UIImage *)currentImage {
-    UIImage *newImage = [UIImage imageWithCGImage:currentImage.CGImage
-                                            scale:[UIScreen mainScreen].scale
-                                      orientation:currentImage.imageOrientation];
-
-    self.imageViewFull.image = newImage;
+    self.imageViewFull.image = currentImage;
     [self updateFrame];
 }
 
@@ -211,11 +223,17 @@
     return self.imageViewFull.image;
 }
 
-
 -(void)prepareForReuse {
     self.imageViewFull.image = nil;
     self.oldBounds = CGRectZero;
     self.oldImageSize = CGSizeZero;
+}
+
+-(CGSize)constrainedSize {
+    CGSize screenSize = self.bounds.size;
+    screenSize.width -= self.adjustedContentInset.left + self.adjustedContentInset.right;
+    screenSize.height -= self.adjustedContentInset.top + self.adjustedContentInset.bottom;
+    return screenSize;
 }
 
 #pragma mark - Lazy Instantiation

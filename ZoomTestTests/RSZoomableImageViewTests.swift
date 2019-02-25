@@ -10,15 +10,30 @@ import XCTest
 
 import ZoomTest
 
+
+class UIImageMock: UIImage {
+    override var size: CGSize {
+        return CGSize(width: 400, height: 400)
+    }
+
+    override var scale: CGFloat {
+        return 2.0
+    }
+}
 class RSZoomableImageViewTests: XCTestCase {
-    let sut = RSZoomableImageView()
 
     func testCenter() {
-        sut.frame = CGRect(x: 0.0, y: 0.0, width: 200.0, height: 200.0)
-        let image = UIImage(named: "transamerica_pyramid.jpg")!
-        sut.update(image, shouldUpdateFrame: true)
+        let sut = RSZoomableImageView(frame: CGRect(x: 0.0, y: 0.0, width: 200.0, height: 200.0))
+        let image = UIImageMock()
+        sut.currentImage = image
         sut.layoutSubviews()
         XCTAssert(sut.imageViewFull.frame == CGRect(x: 0, y: 0, width: 0, height: 0))
+    }
+
+    func testMinimumZoomScale() {
+        let sut = RSZoomableImageView(frame: CGRect(x: 0.0, y: 0.0, width: 200.0, height: 200.0), withScreenScale: 2.0)
+        sut.currentImage = UIImageMock()
+        XCTAssertEqual(sut.minimumZoomScale, 0.5, "must be equal")
     }
 
 }
