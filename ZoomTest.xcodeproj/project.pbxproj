@@ -10,7 +10,6 @@
 		C87A682D221A1A9300C424AD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A682C221A1A9300C424AD /* AppDelegate.swift */; };
 		C87A6834221A1A9400C424AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C87A6833221A1A9400C424AD /* Assets.xcassets */; };
 		C87A6837221A1A9400C424AD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C87A6835221A1A9400C424AD /* LaunchScreen.storyboard */; };
-		C87A6842221A1A9500C424AD /* ZoomTestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A6841221A1A9500C424AD /* ZoomTestTests.swift */; };
 		C87A684D221A1A9500C424AD /* ZoomTestUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A684C221A1A9500C424AD /* ZoomTestUITests.swift */; };
 		C87A685C221A220900C424AD /* CropViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A685A221A220900C424AD /* CropViewController.swift */; };
 		C87A685D221A220900C424AD /* CropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A685B221A220900C424AD /* CropView.swift */; };
@@ -44,7 +43,6 @@
 		C87A6836221A1A9400C424AD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C87A6838221A1A9400C424AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C87A683D221A1A9500C424AD /* ZoomTestTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZoomTestTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C87A6841221A1A9500C424AD /* ZoomTestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomTestTests.swift; sourceTree = "<group>"; };
 		C87A6843221A1A9500C424AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C87A6848221A1A9500C424AD /* ZoomTestUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZoomTestUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C87A684C221A1A9500C424AD /* ZoomTestUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomTestUITests.swift; sourceTree = "<group>"; };
@@ -124,7 +122,6 @@
 			isa = PBXGroup;
 			children = (
 				C87A6864221A7E5E00C424AD /* RSZoomableImageViewTests.swift */,
-				C87A6841221A1A9500C424AD /* ZoomTestTests.swift */,
 				C87A6843221A1A9500C424AD /* Info.plist */,
 			);
 			path = ZoomTestTests;
@@ -284,7 +281,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C87A6865221A7E5E00C424AD /* RSZoomableImageViewTests.swift in Sources */,
-				C87A6842221A1A9500C424AD /* ZoomTestTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -49,13 +49,23 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ZoomTestTests/RSZoomableImageViewTests.swift"
-            timestampString = "572767581.518766"
+            timestampString = "572848812.533078"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "30"
-            endingLineNumber = "30"
-            landmarkName = "testCenter()"
+            startingLineNumber = "57"
+            endingLineNumber = "57"
+            landmarkName = "test2xImage()"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.ExceptionBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            scope = "0"
+            stopOnStyle = "0">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -65,43 +75,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ZoomTest/RSZoomableImageView.m"
-            timestampString = "572767581.51904"
+            timestampString = "572848812.5333641"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "127"
-            endingLineNumber = "127"
-            landmarkName = "-minimumZoomScaleForImageSize:withImageScale:andScreenSizeBounds:"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ZoomTest/RSZoomableImageView.m"
-            timestampString = "572767581.51955"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "114"
-            endingLineNumber = "114"
-            landmarkName = "-updateZoomBounds"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ZoomTest/RSZoomableImageView.m"
-            timestampString = "572767581.519785"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "97"
-            endingLineNumber = "97"
+            startingLineNumber = "180"
+            endingLineNumber = "180"
             landmarkName = "-updateContentSize"
             landmarkType = "7">
          </BreakpointContent>

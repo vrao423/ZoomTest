@@ -31,7 +31,7 @@ class CropView: UIView {
 
     var contentInset: UIEdgeInsets = .zero {
         didSet {
-//            imageView.contentInset = contentInset
+            imageView.contentInset = contentInset
         }
     }
 

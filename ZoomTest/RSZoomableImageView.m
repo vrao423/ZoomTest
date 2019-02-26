@@ -10,7 +10,7 @@
 
 @interface RSZoomableImageView () <UIScrollViewDelegate>
 
-@property (assign, nonatomic) CGRect oldBounds;
+@property (assign, nonatomic) CGSize oldBounds;
 @property (assign, nonatomic) CGSize oldImageSize;
 @property (assign, nonatomic, getter = isUpdatingFrame) BOOL updatingFrame;
 
@@ -43,8 +43,11 @@
 
         self.screenScale = [UIScreen mainScreen].scale;
 
-//        [NSTimer scheduledTimerWithTimeInterval:1.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
-//            NSLog(@"loop imageview frame: %@", NSStringFromCGRect(self.imageViewFull.frame));
+//        [NSTimer scheduledTimerWithTimeInterval:5.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+//            NSLog(@"imageview frame: %@", NSStringFromCGRect(self.imageViewFull.frame));
+//            NSLog(@"imageview bounds: %@", NSStringFromCGRect(self.imageViewFull.bounds));
+//            NSLog(@"affine: %@", NSStringFromCGAffineTransform(self.imageViewFull.transform));
+//            NSLog(@"zoomScale: %.2f", self.zoomScale);
 //        }];
     }
     
@@ -52,9 +55,13 @@
 }
 
 -(void)centerScrollViewContents {
+    NSLog(@"centerScrollViewContents");
 
     CGSize screenSize = [self constrainedSize];
     CGRect contentsFrame = self.imageViewFull.frame;
+
+    NSLog(@"screenSize: %@", NSStringFromCGSize(screenSize));
+    NSLog(@"old contentsFrame: %@\n\n\n", NSStringFromCGRect(contentsFrame));
 
     if (CGSizeEqualToSize(contentsFrame.size, CGSizeZero) ) {
         return;
@@ -72,66 +79,9 @@
         contentsFrame.origin.y = 0.0f;
     }
 
-    NSLog(@"bounds Size: %@", NSStringFromCGSize(screenSize));
-    NSLog(@"contentsFrame: %@", NSStringFromCGRect(contentsFrame));
+    NSLog(@"new contentsFrame: %@\n\n\n", NSStringFromCGRect(contentsFrame));
 
     self.imageViewFull.frame = contentsFrame;
-}
-
--(void)updateContentSize {
-
-    if (CGRectIsEmpty(self.bounds)) {
-        return;
-    }
-
-    CGSize imageSize = CGSizeApplyAffineTransform(self.currentImage.size,
-                                                  CGAffineTransformMakeScale(self.currentImage.scale/self.screenScale,
-                                                                             self.currentImage.scale/self.screenScale));
-
-    if (CGSizeEqualToSize(imageSize, CGSizeZero)) {
-        return;
-    }
-
-    self.contentSize = imageSize;
-
-    if (!CGSizeEqualToSize(self.contentSize, self.imageViewFull.bounds.size)) {
-        self.imageViewFull.bounds = CGRectMake(0.0,
-                                              0.0,
-                                              self.contentSize.width,
-                                              self.contentSize.height);
-    }
-}
-
--(void)updateZoomBounds {
-
-    if (!self.currentImage) {
-        return;
-    }
-
-    CGSize imageSize = self.imageViewFull.image.size;
-    CGSize screenSize = [self constrainedSize];
-
-    self.minimumZoomScale = [self minimumZoomScaleForImageSize:imageSize
-                                                withImageScale:self.imageViewFull.image.scale
-                                           andScreenSizeBounds:screenSize];
-    
-    self.maximumZoomScale = MAX(self.minimumZoomScale * 2.0, 1.0);
-}
-
--(CGFloat)minimumZoomScaleForImageSize:(CGSize)imageSize
-                         withImageScale:(CGFloat)imageScale
-                    andScreenSizeBounds:(CGSize)screenSize {
-
-    NSAssert(!CGSizeEqualToSize(imageSize, CGSizeZero), @"rect cannot be empty");
-    
-    CGFloat ratio = imageSize.width / imageSize.height;
-    CGFloat deviceRatio = screenSize.width / screenSize.height;
-    
-    if (ratio > deviceRatio) {
-        return screenSize.width * self.screenScale / (imageSize.width * imageScale);
-    } else {
-        return screenSize.height * self.screenScale / (imageSize.height * imageScale);
-    }
 }
 
 -(void)adjustedContentInsetDidChange {
@@ -139,24 +89,19 @@
     [self updateFrame];
 }
 
--(void)setBounds:(CGRect)bounds {
-    [super setBounds:bounds];
+- (void)layoutSubviews {
+    [super layoutSubviews];
 
-    if (CGSizeEqualToSize(self.currentImage.size, CGSizeZero)) {
+    CGSize screenSize = [self constrainedSize];
+
+    if (CGSizeEqualToSize(screenSize, self.oldBounds)) {
         return;
     }
 
-    if (CGSizeEqualToSize(bounds.size, self.oldBounds.size)) {
-        return;
-    }
+    NSLog(@"layoutSubviews");
 
     [self updateFrame];
-
-    self.oldBounds = bounds;
-}
-
--(void)doubleTapRecognized:(UITapGestureRecognizer *)tapGestureRecognizer {
-    [self setZoomScale:self.minimumZoomScale animated:YES];
+    self.oldBounds = screenSize;
 }
 
 -(void)addSubview:(UIView *)view {
@@ -169,6 +114,8 @@
     if (self.updatingFrame) {
         return;
     }
+
+    NSLog(@"scrollViewDidZoom:");
 
     [self centerScrollViewContents];
     [self.zoomDelegate zoomableImageViewDidZoom:self];
@@ -185,8 +132,7 @@
 #pragma mark - Update
 
 -(void)updateFrame {
-
-    if (self.updatingFrame) {
+    if (CGRectIsEmpty(self.bounds)) {
         return;
     }
 
@@ -194,46 +140,99 @@
         return;
     }
 
-    if (CGRectIsEmpty(self.bounds)) {
-        return;
-    }
-
     if (CGSizeEqualToSize(self.oldImageSize, self.imageViewFull.image.size)) {
         return;
     }
 
-    self.updatingFrame = YES;
+    NSLog(@"updateFrame");
 
-    [self updateContentSize];
     [self updateZoomBounds];
     self.zoomScale = self.minimumZoomScale;
     [self centerScrollViewContents];
 
     self.oldImageSize = self.imageViewFull.image.size;
-
-    self.updatingFrame = NO;
-}
-
--(void)setCurrentImage:(UIImage *)currentImage {
-    self.imageViewFull.image = currentImage;
-    [self updateFrame];
-}
-
--(UIImage *)currentImage {
-    return self.imageViewFull.image;
 }
 
 -(void)prepareForReuse {
     self.imageViewFull.image = nil;
-    self.oldBounds = CGRectZero;
     self.oldImageSize = CGSizeZero;
 }
+
+#pragma mark - Private
 
 -(CGSize)constrainedSize {
     CGSize screenSize = self.bounds.size;
     screenSize.width -= self.adjustedContentInset.left + self.adjustedContentInset.right;
     screenSize.height -= self.adjustedContentInset.top + self.adjustedContentInset.bottom;
     return screenSize;
+}
+
+-(void)updateContentSize {
+    NSAssert(!CGSizeEqualToSize(self.currentImage.size, CGSizeZero), @"image size is zero");
+
+    NSLog(@"updateContentSize");
+
+    CGSize imageSize = CGSizeApplyAffineTransform(self.currentImage.size,
+                                                  CGAffineTransformMakeScale(self.currentImage.scale/self.screenScale,
+                                                                             self.currentImage.scale/self.screenScale));
+    self.contentSize = imageSize;
+
+    self.imageViewFull.bounds = CGRectMake(0.0,
+                                           0.0,
+                                           self.contentSize.width,
+                                           self.contentSize.height);
+}
+
+-(void)updateZoomBounds {
+
+    if (!self.currentImage) {
+        return;
+    }
+
+    NSLog(@"updateZoomBounds");
+
+    CGSize imageSize = self.currentImage.size;
+    CGSize screenSize = [self constrainedSize];
+
+    self.minimumZoomScale = [self minimumZoomScaleForImageSize:imageSize
+                                                withImageScale:self.currentImage.scale
+                                           andScreenSizeBounds:screenSize];
+
+    self.maximumZoomScale = MAX(self.minimumZoomScale * 2.0, 1.0);
+}
+
+-(CGFloat)minimumZoomScaleForImageSize:(CGSize)imageSize
+                        withImageScale:(CGFloat)imageScale
+                   andScreenSizeBounds:(CGSize)screenSize {
+
+    NSAssert(!CGSizeEqualToSize(imageSize, CGSizeZero), @"rect cannot be empty");
+
+    CGFloat ratio = imageSize.width / imageSize.height;
+    CGFloat deviceRatio = screenSize.width / screenSize.height;
+
+    if (ratio > deviceRatio) {
+        return screenSize.width * self.screenScale / (imageSize.width * imageScale);
+    } else {
+        return screenSize.height * self.screenScale / (imageSize.height * imageScale);
+    }
+}
+
+#pragma mark - User Actions
+
+-(void)doubleTapRecognized:(UITapGestureRecognizer *)tapGestureRecognizer {
+    [self setZoomScale:self.minimumZoomScale animated:YES];
+}
+
+#pragma mark - Setters/Getters
+
+-(void)setCurrentImage:(UIImage *)currentImage {
+    self.imageViewFull.image = currentImage;
+    [self updateContentSize];
+    [self updateFrame];
+}
+
+-(UIImage *)currentImage {
+    return self.imageViewFull.image;
 }
 
 #pragma mark - Lazy Instantiation
